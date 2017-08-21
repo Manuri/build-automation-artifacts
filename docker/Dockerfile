@@ -40,19 +40,9 @@ mkdir -p /build/software/maven \
 && rm /build/software/maven/apache-maven-3.0.5-bin.tar.gz
 
 RUN \
-wget -P /build/software/maven https://archive.apache.org/dist/maven/maven-3/3.2.2/binaries/apache-maven-3.2.2-bin.tar.gz \
-&& tar -xvzf /build/software/maven/apache-maven-3.2.2-bin.tar.gz --directory /build/software/maven \
-&& rm /build/software/maven/apache-maven-3.2.2-bin.tar.gz
-
-RUN \
 wget -P /build/software/maven https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz \
 && tar -xvzf /build/software/maven/apache-maven-3.3.9-bin.tar.gz --directory /build/software/maven \
 && rm /build/software/maven/apache-maven-3.3.9-bin.tar.gz
-
-RUN \
-wget -P /build/software/maven https://archive.apache.org/dist/maven/maven-2/2.2.1/binaries/apache-maven-2.2.1-bin.tar.gz \
-&& tar -xvzf /build/software/maven/apache-maven-2.2.1-bin.tar.gz --directory /build/software/maven \
-&& rm /build/software/maven/apache-maven-2.2.1-bin.tar.gz
 
 RUN mkdir -p /build/software/java
 
@@ -71,21 +61,6 @@ tar -xvzf /build/software/java/jdk-8u144-linux-x64.tar.gz --directory /build/sof
 && rm  /build/software/jce/jce_policy-8.zip \
 && rm -r /build/software/jce/UnlimitedJCEPolicyJDK8
 
-COPY jdk-8u45-linux-x64.tar.gz /build/software/java
-
-RUN \
-tar -xvzf /build/software/java/jdk-8u45-linux-x64.tar.gz --directory /build/software/java \
-&& rm /build/software/java/jdk-8u45-linux-x64.tar.gz \
-&& mkdir -p /build/software/jce \
-&& wget -P /build/software/jce --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip \
-&& unzip -o /build/software/jce/jce_policy-8.zip -d /build/software/jce \
-&& mv /build/software/java/jdk1.8.0_45/jre/lib/security/local_policy.jar /build/software/java/jdk1.8.0_45/jre/lib/security/local_policy-original.jar \
-&& mv /build/software/java/jdk1.8.0_45/jre/lib/security/US_export_policy.jar /build/software/java/jdk1.8.0_45/jre/lib/security/US_export_policy-original.jar \
-&& cp /build/software/jce/UnlimitedJCEPolicyJDK8/local_policy.jar /build/software/java/jdk1.8.0_45/jre/lib/security/ \
-&& cp /build/software/jce/UnlimitedJCEPolicyJDK8/US_export_policy.jar /build/software/java/jdk1.8.0_45/jre/lib/security/ \
-&& rm  /build/software/jce/jce_policy-8.zip \
-&& rm -r /build/software/jce/UnlimitedJCEPolicyJDK8
-
 COPY jdk-7u51-linux-x64.tar.gz /build/software/java
 
 RUN \
@@ -100,14 +75,6 @@ tar -xvzf /build/software/java/jdk-7u51-linux-x64.tar.gz --directory /build/soft
 && rm /build/software/jce/UnlimitedJCEPolicyJDK7.zip \
 && rm -r /build/software/jce/UnlimitedJCEPolicy
 
-
-RUN apt-get update && apt-get install -y openjdk-7-jdk && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN \
-add-apt-repository ppa:openjdk-r/ppa -y \
-&& apt-get update && apt-get install -y openjdk-8-jdk \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/*
 
 COPY jdk-6u33-linux-x64.bin /build/software/java
 
@@ -132,16 +99,16 @@ echo "net.ipv4.ip_local_port_range=15000 61000" >> /etc/sysctl.conf \
 && echo "*	soft	nproc	65535" >> /etc/security/limits.conf \
 && echo "*	hard	nproc	65535" >> /etc/security/limits.conf
 
-RUN \
-mkdir -p /home/jenkins
-
-RUN mkdir -p /build/gpg-keys/.gnupg 
-ADD .gnupg /build/gpg-keys/.gnupg
-
+#RUN \
+#mkdir -p /home/jenkins
+ENV JAVA_HOME=/build/software/java/jdk1.8.0_144
+ENV MAVEN_HOME=/build/software/maven/apache-maven-3.0.5
+ENV PATH=$PATH:$JAVA_HOME
+ENV PATH=$PATH:$MAVEN_HOME/bin
 EXPOSE 22
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+#COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["/usr/sbin/sshd", "-D"]
